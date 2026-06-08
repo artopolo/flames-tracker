@@ -1,0 +1,12 @@
+{
+  "id": "project-07",
+  "name": "Rooftop Sauna Barcelona",
+  "client": "Concept",
+  "function": "hook shot",
+  "action": "sweating on a rooftop sauna above the Barcelona skyline",
+  "elements": ["rooftop", "glass sauna", "Barcelona skyline", "Sagrada Familia silhouette", "sunset", "urban heat"],
+  "current_prompt": "A glass sauna on a Barcelona rooftop at sunset, the city stretching below, Sagrada Família on the horizon, amber light and heat haze, a figure inside silhouetted against the skyline, cinematic.",
+  "prompt_history": [],
+  "images": [],
+  "status": "idea"
+}
