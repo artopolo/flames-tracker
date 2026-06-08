@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FLAMES · Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0a09; --bg2:#141210; --line:#2a2622; --txt:#e9e2d8; --dim:#8a8076;
+  --ember:#ff5e2b; --ember-dim:#b8431f; --steam:#cdbfae;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:"IBM Plex Sans",sans-serif;
+  line-height:1.5;-webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(900px 500px at 80% -10%, rgba(255,94,43,.10), transparent 60%);
+  min-height:100vh}
+.wrap{max-width:1180px;margin:0 auto;padding:40px 24px 80px}
+header{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:22px}
+.mark{width:11px;height:11px;border-radius:50%;background:var(--ember);box-shadow:0 0 18px 2px var(--ember-dim);align-self:center}
+h1{font-family:"Fraunces",serif;font-weight:900;font-size:30px;letter-spacing:.04em}
+h1 .t{color:var(--ember)}
+.sub{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--dim);margin-left:auto}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:22px 0 28px}
+input,select{background:var(--bg2);border:1px solid var(--line);color:var(--txt);
+  font-family:"IBM Plex Mono",monospace;font-size:12px;padding:9px 12px;border-radius:8px}
+input{flex:1;min-width:160px}
+input:focus,select:focus{outline:none;border-color:var(--ember-dim)}
+.chips{display:flex;gap:6px}
+.chip{font-family:"IBM Plex Mono",monospace;font-size:11px;padding:7px 12px;border-radius:999px;
+  border:1px solid var(--line);color:var(--dim);background:transparent;cursor:pointer;transition:.15s}
+.chip.on{border-color:var(--ember);color:var(--ember)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;
+  transition:.2s;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-3px);border-color:var(--ember-dim)}
+.thumb{aspect-ratio:16/10;background:
+  radial-gradient(120px 80px at 70% 30%, rgba(255,94,43,.22), transparent 70%),
+  linear-gradient(160deg,#1b1815,#0e0d0c);display:flex;align-items:flex-end;justify-content:flex-end;padding:10px}
+.thumb img{width:100%;height:100%;object-fit:cover;position:absolute}
+.thumb-wrap{position:relative;aspect-ratio:16/10}
+.badge{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.05em;text-transform:uppercase;
+  padding:4px 9px;border-radius:999px;background:rgba(0,0,0,.55);border:1px solid var(--line);color:var(--steam);
+  position:relative;z-index:2}
+.badge.idea{color:var(--dim)} .badge.done{color:#8fd19e;border-color:#2f4a36}
+.body{padding:16px 16px 18px}
+.name{font-family:"Fraunces",serif;font-weight:600;font-size:19px;line-height:1.15}
+.client{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ember);margin-top:3px;letter-spacing:.03em}
+.recipe{font-size:13px;color:var(--steam);margin-top:11px}
+.recipe b{color:var(--dim);font-weight:400}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px}
+.tag{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--dim);border:1px solid var(--line);
+  padding:3px 7px;border-radius:6px}
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(5,4,3,.8);backdrop-filter:blur(4px);display:none;
+  align-items:center;justify-content:center;padding:24px;z-index:50}
+.ov.on{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--line);border-radius:16px;max-width:620px;width:100%;
+  max-height:86vh;overflow:auto;padding:28px}
+.modal .name{font-size:26px}
+.lbl{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--dim);margin:22px 0 7px}
+.prompt{font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.6;background:var(--bg);
+  border:1px solid var(--line);border-left:2px solid var(--ember);border-radius:8px;padding:13px 15px;color:var(--steam)}
+.hist{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--dim);padding:9px 13px;border:1px dashed var(--line);
+  border-radius:8px;margin-top:7px}
+.x{float:right;font-family:"IBM Plex Mono",monospace;color:var(--dim);cursor:pointer;font-size:18px}
+.empty{color:var(--dim);font-family:"IBM Plex Mono",monospace;font-size:13px;padding:40px 0;text-align:center}
+footer{margin-top:40px;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--dim);
+  border-top:1px solid var(--line);padding-top:18px}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.card{animation:rise .4s both}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="mark"></span>
+    <h1>FLAMES <span class="t">·</span> TRACKER</h1>
+    <span class="sub" id="count">loading…</span>
+  </header>
+
+  <div class="bar">
+    <input id="q" placeholder="search name, element, prompt…">
+    <select id="client"><option value="">all clients</option></select>
+    <div class="chips" id="chips">
+      <button class="chip on" data-s="">all</button>
+      <button class="chip" data-s="idea">idea</button>
+      <button class="chip" data-s="in progress">in progress</button>
+      <button class="chip" data-s="done">done</button>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" style="display:none">nothing here yet.</div>
+
+  <footer>data lives in <b style="color:var(--steam)">/projects</b> as one JSON per card — edit by hand or via the GitHub connector. images go in <b style="color:var(--steam)">/images</b>.</footer>
+</div>
+
+<div class="ov" id="ov">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+let CARDS=[], fS="", fC="", fQ="";
+const grid=document.getElementById('grid'), empty=document.getElementById('empty');
+
+async function load(){
+  try{
+    const m=await (await fetch('projects/manifest.json?'+Date.now())).json();
+    CARDS=await Promise.all(m.projects.map(f=>fetch('projects/'+f+'?'+Date.now()).then(r=>r.json())));
+    const sel=document.getElementById('client');
+    [...new Set(CARDS.map(c=>c.client))].forEach(cl=>{
+      const o=document.createElement('option');o.value=cl;o.textContent=cl;sel.appendChild(o);
+    });
+    render();
+  }catch(e){ document.getElementById('count').textContent='could not load /projects'; }
+}
+function statusClass(s){return s==='done'?'done':s==='idea'?'idea':''}
+function render(){
+  const list=CARDS.filter(c=>{
+    if(fS && c.status!==fS) return false;
+    if(fC && c.client!==fC) return false;
+    if(fQ){const blob=(c.name+' '+c.client+' '+(c.elements||[]).join(' ')+' '+(c.current_prompt||'')).toLowerCase();
+      if(!blob.includes(fQ)) return false;}
+    return true;
+  });
+  document.getElementById('count').textContent=list.length+' / '+CARDS.length+' projects';
+  empty.style.display=list.length?'none':'block';
+  grid.innerHTML=list.map((c,i)=>{
+    const img=(c.images&&c.images[0])?`<img src="${c.images[0]}" onerror="this.style.display='none'">`:'';
+    const tags=(c.elements||[]).slice(0,5).map(e=>`<span class="tag">${e}</span>`).join('');
+    return `<div class="card" style="animation-delay:${i*40}ms" onclick="open_(${CARDS.indexOf(c)})">
+      <div class="thumb-wrap"><div class="thumb">${img}<span class="badge ${statusClass(c.status)}">${c.status||''}</span></div></div>
+      <div class="body">
+        <div class="name">${c.name}</div>
+        <div class="client">${c.client}</div>
+        <div class="recipe"><b>${c.function}</b> — ${c.action}</div>
+        <div class="tags">${tags}</div>
+      </div></div>`;
+  }).join('');
+}
+function open_(idx){
+  const c=CARDS[idx];
+  const hist=(c.prompt_history||[]).map(h=>`<div class="hist">${h}</div>`).join('')||'<div class="hist">none yet</div>';
+  document.getElementById('modal').innerHTML=`
+    <span class="x" onclick="close_()">✕</span>
+    <div class="name">${c.name}</div>
+    <div class="client">${c.client} · ${c.status||''}</div>
+    <div class="lbl">recipe</div>
+    <div class="recipe"><b>function</b> ${c.function} &nbsp; <b>action</b> ${c.action}</div>
+    <div class="tags">${(c.elements||[]).map(e=>`<span class="tag">${e}</span>`).join('')}</div>
+    <div class="lbl">current prompt</div>
+    <div class="prompt">${c.current_prompt||'—'}</div>
+    <div class="lbl">prompt history</div>${hist}`;
+  document.getElementById('ov').classList.add('on');
+}
+function close_(){document.getElementById('ov').classList.remove('on')}
+document.getElementById('ov').onclick=e=>{if(e.target.id==='ov')close_()};
+document.getElementById('q').oninput=e=>{fQ=e.target.value.toLowerCase();render()};
+document.getElementById('client').onchange=e=>{fC=e.target.value;render()};
+document.getElementById('chips').onclick=e=>{
+  if(!e.target.dataset.s&&e.target.dataset.s!=='')return;
+  [...document.querySelectorAll('.chip')].forEach(c=>c.classList.remove('on'));
+  e.target.classList.add('on');fS=e.target.dataset.s;render();
+};
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "id": "project-01",
+  "name": "Kenozerye Dawn",
+  "client": "Kenozerye SPA",
+  "function": "establishing shot",
+  "action": "stepping out of the steam into northern light",
+  "elements": ["timber bathhouse", "lake mist", "low arctic sun", "wet wood", "lone figure"],
+  "current_prompt": "A lone figure steps from a timber bathhouse onto a wooden jetty at dawn, steam rising off bare shoulders, a still northern lake and pale arctic sun behind, cinematic, quiet.",
+  "prompt_history": [
+    "Figure leaving a sauna by a lake at sunrise, steam, mist."
+  ],
+  "images": [],
+  "status": "in progress"
+}

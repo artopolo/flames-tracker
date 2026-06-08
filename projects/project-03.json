@@ -1,0 +1,14 @@
+{
+  "id": "project-03",
+  "name": "Mytninskie Heritage",
+  "client": "Мытнинские бани",
+  "function": "establishing shot",
+  "action": "entering the restored heritage hall",
+  "elements": ["vaulted brick hall", "shafts of light", "tiled basins", "patina", "stillness"],
+  "current_prompt": "Interior of a restored historic bathhouse hall, brick vaults and old tile, a single shaft of light through high windows, empty and reverent, architectural, warm.",
+  "prompt_history": [
+    "Old St Petersburg bathhouse interior, brick vaults, light."
+  ],
+  "images": [],
+  "status": "idea"
+}

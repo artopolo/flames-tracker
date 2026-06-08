@@ -1,0 +1,15 @@
+{
+  "id": "project-02",
+  "name": "Grove Plunge",
+  "client": "Баня возле рощи",
+  "function": "hook shot",
+  "action": "plunging into cold water beside the grove",
+  "elements": ["birch grove", "plunge pool", "rising steam", "winter light", "splash"],
+  "current_prompt": "A figure plunges into a dark cold pool framed by bare birch trunks, steam tearing off the water surface, sharp winter light, motion, visceral.",
+  "prompt_history": [
+    "Cold plunge in a birch forest, steam, winter.",
+    "Wide shot of plunge pool beside a grove."
+  ],
+  "images": [],
+  "status": "in progress"
+}
