@@ -1,0 +1,12 @@
+{
+  "id": "project-05",
+  "name": "Spa on a Cruise Ship",
+  "client": "Concept",
+  "function": "establishing shot",
+  "action": "bathing on deck as the ship cuts open sea",
+  "elements": ["cruise ship deck", "infinity pool", "open sea", "golden hour", "steam", "glass and teak"],
+  "current_prompt": "A serene spa pool on the open deck of a cruise ship at golden hour, infinity edge meeting the sea horizon, soft steam off calm water, glass and teak, cinematic, expansive.",
+  "prompt_history": [],
+  "images": [],
+  "status": "idea"
+}
