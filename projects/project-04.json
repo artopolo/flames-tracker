@@ -4,9 +4,17 @@
   "client": "Concept",
   "function": "hook shot",
   "action": "a long-haul driver stepping from the cab into the steam",
-  "elements": ["truck stop at night", "parked rigs", "cold neon", "rising steam", "tired driver"],
+  "elements": [
+    "truck stop at night",
+    "parked rigs",
+    "cold neon",
+    "rising steam",
+    "tired driver"
+  ],
   "current_prompt": "A weary long-haul trucker steps down from his cab into a steaming roadside bathhouse at night, parked rigs and cold neon behind him, warm light spilling from the open door, cinematic, human.",
   "prompt_history": [],
-  "images": [],
+  "images": [
+    "images/project-04/v1.png"
+  ],
   "status": "idea"
 }
