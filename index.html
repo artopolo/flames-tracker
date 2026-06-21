@@ -24,14 +24,17 @@ h1{font-family:"Fraunces",serif;font-weight:900;font-size:30px;letter-spacing:.0
 h1 .t{color:var(--ember)}
 .sub{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--dim);margin-left:auto}
 .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:22px 0 28px}
-input,select{background:var(--bg2);border:1px solid var(--line);color:var(--txt);
+input,select,textarea{background:var(--bg2);border:1px solid var(--line);color:var(--txt);
   font-family:"IBM Plex Mono",monospace;font-size:12px;padding:9px 12px;border-radius:8px}
 input{flex:1;min-width:160px}
-input:focus,select:focus{outline:none;border-color:var(--ember-dim)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ember-dim)}
 .chips{display:flex;gap:6px}
 .chip{font-family:"IBM Plex Mono",monospace;font-size:11px;padding:7px 12px;border-radius:999px;
   border:1px solid var(--line);color:var(--dim);background:transparent;cursor:pointer;transition:.15s}
 .chip.on{border-color:var(--ember);color:var(--ember)}
+.addbtn{font-family:"IBM Plex Mono",monospace;font-size:11px;padding:8px 14px;border-radius:8px;
+  border:1px solid var(--ember-dim);color:var(--ember);background:transparent;cursor:pointer;transition:.15s}
+.addbtn:hover{background:rgba(255,94,43,.1)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}
 .card{background:var(--bg2);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;
   transition:.2s;display:flex;flex-direction:column}
@@ -53,7 +56,6 @@ input:focus,select:focus{outline:none;border-color:var(--ember-dim)}
 .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px}
 .tag{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--dim);border:1px solid var(--line);
   padding:3px 7px;border-radius:6px}
-/* modal */
 .ov{position:fixed;inset:0;background:rgba(5,4,3,.8);backdrop-filter:blur(4px);display:none;
   align-items:center;justify-content:center;padding:24px;z-index:50}
 .ov.on{display:flex}
@@ -68,6 +70,13 @@ input:focus,select:focus{outline:none;border-color:var(--ember-dim)}
   border-radius:8px;margin-top:7px}
 .x{float:right;font-family:"IBM Plex Mono",monospace;color:var(--dim);cursor:pointer;font-size:18px}
 .empty{color:var(--dim);font-family:"IBM Plex Mono",monospace;font-size:13px;padding:40px 0;text-align:center}
+.row{display:flex;gap:8px;margin-top:10px}
+.row textarea{flex:1;min-height:60px;resize:vertical}
+.save{font-family:"IBM Plex Mono",monospace;font-size:11px;padding:0 16px;border-radius:8px;
+  border:1px solid var(--ember-dim);color:var(--ember);background:transparent;cursor:pointer}
+.save:hover{background:rgba(255,94,43,.1)}
+.statusrow{display:flex;gap:6px;margin-top:8px}
+.statusrow .chip{cursor:pointer}
 footer{margin-top:40px;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--dim);
   border-top:1px solid var(--line);padding-top:18px}
 @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
@@ -91,32 +100,46 @@ footer{margin-top:40px;font-family:"IBM Plex Mono",monospace;font-size:11px;colo
       <button class="chip" data-s="in progress">in progress</button>
       <button class="chip" data-s="done">done</button>
     </div>
+    <button class="addbtn" onclick="newCard()">+ new</button>
   </div>
 
   <div class="grid" id="grid"></div>
   <div class="empty" id="empty" style="display:none">nothing here yet.</div>
 
-  <footer>data lives in <b style="color:var(--steam)">/projects</b> as one JSON per card — edit by hand or via the GitHub connector. images go in <b style="color:var(--steam)">/images</b>.</footer>
+  <footer>data lives in <b style="color:var(--steam)">Supabase</b> — edits save instantly and sync with Claude. images go in the <b style="color:var(--steam)">flames</b> storage bucket.</footer>
 </div>
 
 <div class="ov" id="ov">
   <div class="modal" id="modal"></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL="https://sjjktpnpfdwolihydbdh.supabase.co";
+const SUPABASE_KEY="sb_publishable_M6nxxeIRvNCxisL4YbKfRg_RL1W3QhZ";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
 let CARDS=[], fS="", fC="", fQ="";
 const grid=document.getElementById('grid'), empty=document.getElementById('empty');
 
 async function load(){
   try{
-    const m=await (await fetch('projects/manifest.json?'+Date.now())).json();
-    CARDS=await Promise.all(m.projects.map(f=>fetch('projects/'+f+'?'+Date.now()).then(r=>r.json())));
+    const {data:projects,error}=await sb.from('projects').select('*').order('id');
+    if(error)throw error;
+    const {data:history}=await sb.from('prompt_history').select('*').order('created_at');
+    const {data:images}=await sb.from('images').select('*').order('position');
+    CARDS=projects.map(p=>({
+      ...p,
+      prompt_history:(history||[]).filter(h=>h.project_id===p.id).map(h=>h.prompt),
+      images:(images||[]).filter(i=>i.project_id===p.id).map(i=>i.url)
+    }));
     const sel=document.getElementById('client');
-    [...new Set(CARDS.map(c=>c.client))].forEach(cl=>{
+    sel.innerHTML='<option value="">all clients</option>';
+    [...new Set(CARDS.map(c=>c.client).filter(Boolean))].forEach(cl=>{
       const o=document.createElement('option');o.value=cl;o.textContent=cl;sel.appendChild(o);
     });
     render();
-  }catch(e){ document.getElementById('count').textContent='could not load /projects'; }
+  }catch(e){ document.getElementById('count').textContent='could not load: '+e.message; }
 }
 function statusClass(s){return s==='done'?'done':s==='idea'?'idea':''}
 function render(){
@@ -132,38 +155,72 @@ function render(){
   grid.innerHTML=list.map((c,i)=>{
     const img=(c.images&&c.images[0])?`<img src="${c.images[0]}" onerror="this.style.display='none'">`:'';
     const tags=(c.elements||[]).slice(0,5).map(e=>`<span class="tag">${e}</span>`).join('');
-    return `<div class="card" style="animation-delay:${i*40}ms" onclick="open_(${CARDS.indexOf(c)})">
+    return `<div class="card" style="animation-delay:${i*40}ms" onclick="open_('${c.id}')">
       <div class="thumb-wrap"><div class="thumb">${img}<span class="badge ${statusClass(c.status)}">${c.status||''}</span></div></div>
       <div class="body">
         <div class="name">${c.name}</div>
-        <div class="client">${c.client}</div>
-        <div class="recipe"><b>${c.function}</b> — ${c.action}</div>
+        <div class="client">${c.client||''}</div>
+        <div class="recipe"><b>${c.function||''}</b> — ${c.action||''}</div>
         <div class="tags">${tags}</div>
       </div></div>`;
   }).join('');
 }
-function open_(idx){
-  const c=CARDS[idx];
-  const hist=(c.prompt_history||[]).map(h=>`<div class="hist">${h}</div>`).join('')||'<div class="hist">none yet</div>';
+function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function open_(id){
+  const c=CARDS.find(x=>x.id===id);
+  const hist=(c.prompt_history||[]).slice().reverse().map(h=>`<div class="hist">${esc(h)}</div>`).join('')||'<div class="hist">none yet</div>';
   document.getElementById('modal').innerHTML=`
     <span class="x" onclick="close_()">✕</span>
-    <div class="name">${c.name}</div>
-    <div class="client">${c.client} · ${c.status||''}</div>
+    <div class="name">${esc(c.name)}</div>
+    <div class="client">${esc(c.client)} · ${c.status||''}</div>
+    <div class="statusrow">
+      <button class="chip ${c.status==='idea'?'on':''}" onclick="setStatus('${c.id}','idea')">idea</button>
+      <button class="chip ${c.status==='in progress'?'on':''}" onclick="setStatus('${c.id}','in progress')">in progress</button>
+      <button class="chip ${c.status==='done'?'on':''}" onclick="setStatus('${c.id}','done')">done</button>
+    </div>
     <div class="lbl">recipe</div>
-    <div class="recipe"><b>function</b> ${c.function} &nbsp; <b>action</b> ${c.action}</div>
-    <div class="tags">${(c.elements||[]).map(e=>`<span class="tag">${e}</span>`).join('')}</div>
+    <div class="recipe"><b>function</b> ${esc(c.function)} &nbsp; <b>action</b> ${esc(c.action)}</div>
+    <div class="tags">${(c.elements||[]).map(e=>`<span class="tag">${esc(e)}</span>`).join('')}</div>
     <div class="lbl">current prompt</div>
-    <div class="prompt">${c.current_prompt||'—'}</div>
+    <div class="prompt">${esc(c.current_prompt)||'—'}</div>
+    <div class="lbl">new prompt version</div>
+    <div class="row">
+      <textarea id="newprompt" placeholder="write a new version — current one moves to history…"></textarea>
+      <button class="save" onclick="savePrompt('${c.id}')">save</button>
+    </div>
     <div class="lbl">prompt history</div>${hist}`;
   document.getElementById('ov').classList.add('on');
 }
 function close_(){document.getElementById('ov').classList.remove('on')}
+
+async function savePrompt(id){
+  const t=document.getElementById('newprompt').value.trim();
+  if(!t)return;
+  const c=CARDS.find(x=>x.id===id);
+  if(c.current_prompt){
+    await sb.from('prompt_history').insert({project_id:id,prompt:c.current_prompt});
+  }
+  await sb.from('projects').update({current_prompt:t}).eq('id',id);
+  await load(); open_(id);
+}
+async function setStatus(id,s){
+  await sb.from('projects').update({status:s}).eq('id',id);
+  await load(); open_(id);
+}
+async function newCard(){
+  const name=prompt('card name?'); if(!name)return;
+  const {data}=await sb.from('projects').select('id');
+  const nums=(data||[]).map(r=>parseInt((r.id.match(/\d+/)||[0])[0])).filter(n=>!isNaN(n));
+  const next='project-'+String((Math.max(0,...nums)+1)).padStart(2,'0');
+  await sb.from('projects').insert({id:next,name,status:'idea'});
+  await load(); open_(next);
+}
 document.getElementById('ov').onclick=e=>{if(e.target.id==='ov')close_()};
 document.getElementById('q').oninput=e=>{fQ=e.target.value.toLowerCase();render()};
 document.getElementById('client').onchange=e=>{fC=e.target.value;render()};
 document.getElementById('chips').onclick=e=>{
   if(!e.target.dataset.s&&e.target.dataset.s!=='')return;
-  [...document.querySelectorAll('.chip')].forEach(c=>c.classList.remove('on'));
+  [...document.querySelectorAll('.bar .chip')].forEach(c=>c.classList.remove('on'));
   e.target.classList.add('on');fS=e.target.dataset.s;render();
 };
 load();
